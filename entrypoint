@@ -1,0 +1,25 @@
+#!/bin/sh
+# RYSEN DMRMaster+ Version 1.3.9r3 
+#
+###############################################################################
+#   Copyright (C) 2020 Simon Adlem, G7RZU <g7rzu@gb7fr.org.uk>
+#   Copyright (C) 2023 Shane P, Daley M0VUB <support@gb7nr.co.uk>  
+#
+#   This program is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation; either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program; if not, write to the Free Software Foundation,
+#   Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
+###############################################################################
+
+cd /opt/rysen-sp-selfcare
+
+python /opt/rysen-sp-selfcare/hotspot_proxy_v2.py -c /opt/rysen-sp-selfcare/proxy.cfg
