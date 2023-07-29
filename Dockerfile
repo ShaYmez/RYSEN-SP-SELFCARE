@@ -6,7 +6,7 @@ ENTRYPOINT [ "/entrypoint" ]
 
 RUN adduser -D -u 54000 radio && \
         apk update && \
-        apk add git gcc musl-dev libffi-dev openssl-dev cargo mariadb-connector-c-dev && \
+        apk add git gcc musl-dev libffi-dev openssl-dev cargo mariadb-dev && \
         pip install --upgrade pip && \
         pip cache purge && \
         cd /opt && \
