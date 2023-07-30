@@ -190,7 +190,7 @@ class Proxy(DatagramProtocol):
                     if data[8:].upper().startswith(b'PASS='):
                         _psswd = data[13:]
                         if len(_psswd) >= 6:
-                            dk = pbkdf2_hmac('sha256', _psswd, b'FreeDMR', 2000).hex()
+                            dk = pbkdf2_hmac('sha256', _psswd, b'RYSEN', 2000).hex()
                             self.db_proxy.updt_tbl('psswd', _peer_id, psswd=dk)
                             self.transport.write (b''.join([RPTACK, _peer_id]), addr)
                             print(f'Password stored for: {int_id(_peer_id)}')
@@ -295,13 +295,13 @@ if __name__ == '__main__':
 
     # CLI argument parser - handles picking up the config file from the command line, and sending a "help" message
     parser = argparse.ArgumentParser()
-    parser.add_argument('-c', '--config', action='store', dest='CONFIG_FILE', help='/full/path/to/config.file (usually freedmr.cfg)')
+    parser.add_argument('-c', '--config', action='store', dest='CONFIG_FILE', help='/full/path/to/config.file (usually proxy.cfg)')
     cli_args = parser.parse_args()
 
 
     # Ensure we have a path for the config file, if one wasn't specified, then use the execution directory
     if not cli_args.CONFIG_FILE:
-        cli_args.CONFIG_FILE = os.path.dirname(os.path.abspath(__file__))+'/freedmr.cfg'
+        cli_args.CONFIG_FILE = os.path.dirname(os.path.abspath(__file__))+'/proxy.cfg'
 
     _config_file = cli_args.CONFIG_FILE
 
