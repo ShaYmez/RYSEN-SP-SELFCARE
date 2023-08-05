@@ -8,7 +8,6 @@ RUN adduser -D -u 54000 radio && \
         apk update && \
         apk add git gcc musl-dev libffi-dev openssl-dev cargo mariadb-dev && \
         pip install --upgrade pip && \
-        pip install mysqlclient && \
         pip cache purge && \
         cd /opt && \
         git clone https://github.com/ShaYmez/RYSEN-SP-SELFCARE.git rysen-sp-selfcare && \
