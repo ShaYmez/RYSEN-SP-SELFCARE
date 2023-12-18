@@ -342,7 +342,7 @@ if __name__ == '__main__':
         #'' = all IPv4, '::' = all IPv4 and IPv6 (Dual Stack)
         ListenIP = ''
         DestportStart = 54000
-        DestPortEnd = 54100
+        DestPortEnd = 54200
         Timeout = 30
         Stats = False
         Debug = False
