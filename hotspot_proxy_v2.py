@@ -132,7 +132,7 @@ class Proxy(DatagramProtocol):
         #Proxy control commands
         PRBL    = b'PRBL'
 
-        _peer_id = False
+        _peer_id = None
         host,port = addr
         nowtime = time()
         Debug = self.debug
@@ -149,11 +149,12 @@ class Proxy(DatagramProtocol):
                 _bltime = data[8:].decode('UTF-8')
                 _bltime = float(_bltime)
                 try:
-                    self.IPBlackList[self.peerTrack[_peer_id]['shost']] = _bltime
+                    _peer = self.peerTrack[_peer_id]
+                    self.IPBlackList[_peer['shost']] = _bltime
                 except KeyError:
                     return
                 if self.clientinfo:
-                    print('Add to blacklist: host {}. Expire time {}').format(self.peerTrack[_peer_id]['shost'],_bltime)
+                    print('Add to blacklist: host {}. Expire time {}'.format(_peer['shost'], _bltime))
                 return
 
             if _command == DMRD and len(data) >= 15:
@@ -164,26 +165,26 @@ class Proxy(DatagramProtocol):
                     else:
                         _peer_id = self.connTrack.get(port)
             elif data[:6] == MSTNAK:
-                    _peer_id = data[6:10] if len(data) >= 10 else False
+                    _peer_id = data[6:10] if len(data) >= 10 else None
                     if _peer_id:
                         self.cleanup_peer(_peer_id)
                     return
             elif _command == MSTN:
-                    _peer_id = data[6:10] if len(data) >= 10 else False
+                    _peer_id = data[6:10] if len(data) >= 10 else None
                     if _peer_id:
                         self.cleanup_peer(_peer_id)
                     return
             elif _command == MSTP and len(data) >= 11:
                     _peer_id = data[7:11]
             elif _command == MSTC:
-                    _peer_id = data[5:9] if len(data) >= 9 else False
+                    _peer_id = data[5:9] if len(data) >= 9 else None
                     if _peer_id:
                         self.cleanup_peer(_peer_id)
                     return
 
             if self.debug:
                 print(data)
-            if _peer_id and _peer_id in self.peerTrack:
+            if _peer_id is not None and _peer_id in self.peerTrack:
                 self.transport.write(data,(self.peerTrack[_peer_id]['shost'],self.peerTrack[_peer_id]['sport']))
             return
 
