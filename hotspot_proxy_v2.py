@@ -76,17 +76,37 @@ class Proxy(DatagramProtocol):
         self.db_proxy = db_proxy
         self.selfserv = selfservice
 
+    def cleanup_peer(self, _peer_id):
+        _peer = self.peerTrack.get(_peer_id)
+        if not _peer:
+            return
+        for _timer_name in ('timer', 'opt_timer'):
+            _timer = _peer.get(_timer_name)
+            if _timer:
+                try:
+                    if _timer.active():
+                        _timer.cancel()
+                except Exception:
+                    pass
+        self.reaper(_peer_id)
+
     def reaper(self,_peer_id):
+        _peer = self.peerTrack.get(_peer_id)
+        if not _peer:
+            return
         if self.debug:
             print('dead', _peer_id)
         if self.clientinfo and _peer_id != b'\xff\xff\xff\xff':
             print(f"{datetime.now().replace(microsecond=0)} Client: ID:{str(int_id(_peer_id)).rjust(9)} "
-                  f"IP:{self.peerTrack[_peer_id]['shost'].rjust(15)} Port:{self.peerTrack[_peer_id]['sport']} Removed.")
-        self.transport.write(b'RPTCL'+_peer_id, (self.master,self.peerTrack[_peer_id]['dport']))
-        self.connTrack[self.peerTrack[_peer_id]['dport']] = False
+                  f"IP:{_peer['shost'].rjust(15)} Port:{_peer['sport']} Removed.")
+        _dport = _peer.get('dport')
+        if _dport in self.connTrack:
+            self.transport.write(b'RPTCL'+_peer_id, (self.master, _dport))
+            self.connTrack[_dport] = False
         if self.selfserv:
             self.db_proxy.updt_tbl('log_out', _peer_id)
-        del self.peerTrack[_peer_id]
+        if _peer_id in self.peerTrack:
+            del self.peerTrack[_peer_id]
 
     def datagramReceived(self, data, addr):
         # HomeBrew Protocol Commands
@@ -136,28 +156,35 @@ class Proxy(DatagramProtocol):
                     print('Add to blacklist: host {}. Expire time {}').format(self.peerTrack[_peer_id]['shost'],_bltime)
                 return
 
-            if _command == DMRD:
+            if _command == DMRD and len(data) >= 15:
                 _peer_id = data[11:15]
             elif  _command == RPTA:
-                    if data[6:10] in self.peerTrack:
+                    if len(data) >= 10 and data[6:10] in self.peerTrack:
                         _peer_id = data[6:10]
                     else:
-                        _peer_id = self.connTrack[port]
+                        _peer_id = self.connTrack.get(port)
+            elif data[:6] == MSTNAK:
+                    _peer_id = data[6:10] if len(data) >= 10 else False
+                    if _peer_id:
+                        self.cleanup_peer(_peer_id)
+                    return
             elif _command == MSTN:
-                    _peer_id = data[6:10]
-            elif _command == MSTP:
+                    _peer_id = data[6:10] if len(data) >= 10 else False
+                    if _peer_id:
+                        self.cleanup_peer(_peer_id)
+                    return
+            elif _command == MSTP and len(data) >= 11:
                     _peer_id = data[7:11]
             elif _command == MSTC:
-                    _peer_id = data[5:9]
+                    _peer_id = data[5:9] if len(data) >= 9 else False
+                    if _peer_id:
+                        self.cleanup_peer(_peer_id)
+                    return
 
             if self.debug:
                 print(data)
-            if _peer_id in self.peerTrack:
+            if _peer_id and _peer_id in self.peerTrack:
                 self.transport.write(data,(self.peerTrack[_peer_id]['shost'],self.peerTrack[_peer_id]['sport']))
-                # Remove the client after send a MSTN or MSTC packet
-                if _command in (MSTN, MSTC):
-                    # Give time to the client for a reply to prevent port reassignment
-                    self.peerTrack[_peer_id]['timer'].reset(15)
             return
 
         else:
