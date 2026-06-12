@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 ###############################################################################
-# Copyright (C) 2020 Simon Adlem, G7RZU <g7rzu@gb7fr.org.uk>
+#   Copyright (C) 2020 Simon Adlem, G7RZU <g7rzu@gb7fr.org.uk>
+#   Further Developed (C) 2026 by Shane Daley, M0VUB <shane@freestar.network>
 #
 #   This program is free software; you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -33,12 +34,12 @@ from proxy_db import ProxyDB
 
 # Does anybody read this stuff? There's a PEP somewhere that says I should do this.
 __author__     = 'Simon Adlem - G7RZU'
-__verion__     = '1.0.0'
+__verion__     = '1.4.1'
 __copyright__  = 'Copyright (c) Simon Adlem, G7RZU 2020,2021,2022'
-__credits__    = 'Jon Lee, G4TSN; Norman Williams, M6NBP; Christian, OA4DOA'
+__credits__    = 'Christian, OA4DOA; Shane, M0VUB'
 __license__    = 'GNU GPLv3'
-__maintainer__ = 'Simon Adlem G7RZU'
-__email__      = 'simon@gb7fr.org.uk'
+__maintainer__ = 'Shane Daley M0VUB'
+__email__      = 'shane@freestar.network'
 
 
 def IsIPv4Address(ip):
