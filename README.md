@@ -1,7 +1,6 @@
-## RYSEN DMRMaster+ ##
-### A fork of the HBlink3 / FreeDMR project ###
+## RYSEN Hotspot Proxy V2 (Selfcare) ##
 
-Hotspot Proxy V2 - Devoloped by G7RZU
+Hotspot Proxy V2 - Devoloped by G7RZU, further developed by M0VUB
 
 RYSEN DMRMaster+ - Software to build and scale DMR Master server software. Thanks to all thats credited in code, testing and develpment of this software. This software is completly open source and is derived from the orginal fork of HBlink3 / FreeDMR. Developed in PYTHON. A number of developers have contributed to the fork and I thought the time is right to develop this version of the code completly out in the open.. as it should be. No private forks..Open Source for people to freely develop.
 
