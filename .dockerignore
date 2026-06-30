@@ -1,0 +1,10 @@
+.git
+.github
+tests
+sync/README.md
+sync/.rysen-sha
+__pycache__
+*.py[cod]
+.pytest_cache
+README.md
+proxy.cfg

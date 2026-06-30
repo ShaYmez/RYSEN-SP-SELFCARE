@@ -1,11 +1,93 @@
-## RYSEN Hotspot Proxy V2 (Selfcare) ##
+# RYSEN Hotspot Proxy V2 (Selfcare)
 
-Hotspot Proxy V2 - Devoloped by G7RZU, further developed by M0VUB
+Motorola Homebrew hotspot UDP proxy with MariaDB selfcare for the [RYSEN](https://github.com/ShaYmez/RYSEN) stack — public hotspot port to many backend master slots, with client options from the `Clients` table.
 
-RYSEN DMRMaster+ - Software to build and scale DMR Master server software. Thanks to all thats credited in code, testing and develpment of this software. This software is completly open source and is derived from the orginal fork of HBlink3 / FreeDMR. Developed in PYTHON. A number of developers have contributed to the fork and I thought the time is right to develop this version of the code completly out in the open.. as it should be. No private forks..Open Source for people to freely develop.
+Published as **`shaymez/rysen-sp-selfcare:latest`**, modelled on [RYSEN-SP-IPSC](https://github.com/ShaYmez/RYSEN-SP-IPSC). Keeps a **separate slim Docker image** so deployments do not need the full RYSEN image for the hotspot proxy service.
 
-The base code is written by Cortney Buffington N0MJS and further develped by Simon G7RZU, Eric, K7EEL, Shane M0VUB & others. The RYSEN stack will now continue to be developed on GitHub where there is an oppourtunity to develop, maintain & fork with freedom!! This software can be used for networking in DMR. The code is freely availble but must retain all copyright and original creditors in the base code. If using in the public domain please try to retain the copyright in your public dashboards or website. We can then see where the software is being used.
+## Develop in RYSEN; publish here
 
-Project under development!
+**Source of truth:** [ShaYmez/RYSEN](https://github.com/ShaYmez/RYSEN) (`ipsc` branch during IPSC milestone work; `master` after merge). Edit proxy logic, DB layer, sample config, and tests **only in RYSEN**.
 
-More to come as development continues as a fork. - codename: RYSEN
+This repo **syncs** those files into [`sync/`](sync/) and [`tests/`](tests/), then builds and pushes the Docker image. Do not hand-edit synced copies — they are overwritten by [`.github/workflows/sync-from-rysen.yml`](.github/workflows/sync-from-rysen.yml).
+
+| Synced from RYSEN | Local path |
+|-------------------|------------|
+| `hotspot_proxy_v2_sc.py` | `sync/hotspot_proxy_v2.py` |
+| `proxy_db.py` | `sync/proxy_db.py` |
+| `hotspot_proxy_v2_sc-SAMPLE.cfg` | `sync/proxy-SAMPLE.cfg` |
+| `tests/test_hotspot_proxy.py` | `tests/test_hotspot_proxy.py` |
+
+Refresh: **Actions → Sync from RYSEN** (manual), push to proxy files on RYSEN (`ipsc` or `master`), `repository_dispatch`, or daily scheduled sync. A sync commit triggers **Build-RYSEN-SP-SELFCARE** (tests, then image push).
+
+### Wiring RYSEN → this repo
+
+```
+RYSEN push (ipsc or master, hotspot proxy paths)
+    → RYSEN: Sync satellite proxy repos
+    → repository_dispatch → RYSEN-SP-SELFCARE: Sync from RYSEN
+    → commit sync/ if changed → Build-RYSEN-SP-SELFCARE → Docker Hub
+```
+
+1. **PAT in RYSEN** — same **`SATELLITE_DISPATCH_TOKEN`** used for RYSEN-SP-IPSC (one PAT triggers both satellite repos).
+
+2. **RYSEN workflow** — [`.github/workflows/sync-satellite-repos.yml`](https://github.com/ShaYmez/RYSEN/blob/ipsc/.github/workflows/sync-satellite-repos.yml) dispatches `rysen-selfcare-updated` with `client_payload.ref` = the branch you pushed.
+
+3. **Scheduled / manual fallback ref** — set Actions variable **`RYSEN_SYNC_REF`** on this repo to `ipsc` now; change to `master` after RYSEN merge. Push-triggered sync always uses the branch that was pushed.
+
+4. **Docker Hub** — repository secrets **`DOCKER_USERNAME`** and **`DOCKER_PASSWORD`**.
+
+After `ipsc` → `master` merge: update **`RYSEN_SYNC_REF`** to `master` on this repo and on RYSEN-SP-IPSC.
+
+## Quick start (Docker)
+
+1. Copy `sync/proxy-SAMPLE.cfg` to your host config path (e.g. `/etc/rysen/proxy.cfg`).
+2. Set `MASTER` to the RYSEN container IP on your compose network.
+3. Configure MariaDB connection settings to match your RYSEN stack.
+
+```yaml
+hotspot-proxy:
+    container_name: hotspot-proxy
+    image: shaymez/rysen-sp-selfcare:latest
+    volumes:
+        - '/etc/rysen/proxy.cfg:/opt/rysen-sp-selfcare/proxy.cfg'
+    ports:
+        - '62031:62031/udp'
+    restart: unless-stopped
+    depends_on:
+        - rysen
+        - mariadb
+    networks:
+        app_net:
+          ipv4_address: 172.16.238.20
+    read_only: true
+```
+
+See RYSEN `docker-configs/docker-compose.yml` for the full compose profile (`--profile hotspot`).
+
+## Quick start (bare metal)
+
+```bash
+pip install -r requirements.txt
+cp sync/proxy-SAMPLE.cfg proxy.cfg
+# edit proxy.cfg
+PYTHONPATH=sync python sync/hotspot_proxy_v2.py -c proxy.cfg
+```
+
+## Tests
+
+```bash
+pip install -r requirements.txt
+PYTHONPATH=sync python -m unittest discover -s tests -v
+```
+
+## Build image locally
+
+```bash
+docker build -t shaymez/rysen-sp-selfcare:latest .
+```
+
+## Related
+
+- RYSEN hotspot docs: [hotspot-proxy-v2.md](https://github.com/ShaYmez/RYSEN/blob/master/doc/hotspot-proxy-v2.md)
+- Satellite sync model: [satellite-proxy-repos.md](https://github.com/ShaYmez/RYSEN/blob/ipsc/doc/satellite-proxy-repos.md)
+- RYSEN master: [ShaYmez/RYSEN](https://github.com/ShaYmez/RYSEN)
