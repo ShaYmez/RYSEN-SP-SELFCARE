@@ -9,8 +9,6 @@ on:
         default: ipsc
   repository_dispatch:
     types: [rysen-selfcare-updated]
-  schedule:
-    - cron: '0 6 * * *'
 
 permissions:
   contents: write
