@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import unittest
 
-from hotspot_proxy_v2_sc import IsIPv4Address, IsIPv6Address
+from hotspot_proxy_v2 import IsIPv4Address, IsIPv6Address
 
 
 class TestHotspotProxyHelpers(unittest.TestCase):
