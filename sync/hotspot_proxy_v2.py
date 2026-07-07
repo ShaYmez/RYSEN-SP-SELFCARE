@@ -34,7 +34,7 @@ from proxy_db import ProxyDB
 
 # Does anybody read this stuff? There's a PEP somewhere that says I should do this.
 __author__     = 'Simon Adlem - G7RZU'
-__verion__     = '2.0.1'
+__verion__     = '1.5.1'
 __copyright__  = 'Copyright (c) Simon Adlem, G7RZU 2020,2021,2022'
 __credits__    = 'Christian, OA4DOA; Shane, M0VUB'
 __license__    = 'GNU GPLv3'
@@ -293,9 +293,13 @@ class Proxy(DatagramProtocol):
                 _peer_id, options = item
                 if _peer_id not in self.peerTrack or not options:
                     continue
-                self.db_proxy.updt_tbl('rst_mod', _peer_id)
                 bytes_pkt = b''.join((b'RPTO', _peer_id, options.encode()))
                 self.transport.write(bytes_pkt, (self.master, self.peerTrack[_peer_id]['dport']))
+                if 'DISC=1' in options:
+                    # Server-side disconnect is applied by RYSEN — do not clear modified here
+                    print(f'Disc request sent for: {int_id(_peer_id)}')
+                    continue
+                self.db_proxy.updt_tbl('rst_mod', _peer_id)
                 print(f'Options update sent for: {int_id(_peer_id)}')
 
         except Exception as err:
