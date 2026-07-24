@@ -224,7 +224,7 @@ class Proxy(DatagramProtocol):
                             print(f'Password stored for: {int_id(_peer_id)}')
                             return
                     self.db_proxy.updt_tbl('opt_rcvd', _peer_id)
-                    # Login Options= from Pi-Star/VoxDMR override pending selfcare login_opt.
+                    # Options send by peer overrides Self Service options
                     _opt_timer = self.peerTrack[_peer_id].get('opt_timer')
                     if _opt_timer is not None and _opt_timer.active():
                         _opt_timer.cancel()
